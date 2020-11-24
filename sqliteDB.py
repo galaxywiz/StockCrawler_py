@@ -87,7 +87,7 @@ class SqliteDB:
                 return None
             
     # 데이터 로드
-    def load(self, code, orderBy = "candleTime ASC"):
+    def load(self, code, orderBy = "candleTime ASC", startTime = ""):
         tableName = self._tableName(code)
         with self.conn_:
             try:  
@@ -98,7 +98,11 @@ class SqliteDB:
                     else:
                         columns = "%s, %s" % (columns, col)              
 
-                sql = "SELECT %s FROM \'%s\' ORDER BY %s" % (columns, tableName, orderBy)
+                if len(startTime) == 0:
+                    sql = "SELECT %s FROM \'%s\' ORDER BY %s" % (columns, tableName, orderBy)
+                else:
+                    sql = "SELECT %s FROM \'%s\' WHERE candleTime >= \'%s\' ORDER BY %s" % (columns, tableName, startTime, orderBy)
+                
                 df = pd.read_sql(sql, self.conn_, index_col=None)
                 if len(df) == 0:
                     return False, None

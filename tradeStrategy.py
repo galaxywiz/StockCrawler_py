@@ -20,7 +20,7 @@ class TradeStrategy:
 
 #//---------------------------------------------------//
 class MaTradeStrategy(TradeStrategy):  
-    def __init(self, fast = "ema5", slow = "ema20"):
+    def __init__(self, fast = "ema5", slow = "ema20"):
         self.MA_FAST = fast
         self.MA_SLOW = slow
 
@@ -190,7 +190,6 @@ class MACDTradeStrategy(TradeStrategy):
                 signalList.append(np.nan)
 
         return signalList
-
         
 #//---------------------------------------------------//
 class LarryRTradeStrategy(TradeStrategy):
@@ -279,4 +278,4 @@ class LarryRTradeStrategy(TradeStrategy):
             
             signalList.append(np.nan)
 
-        return signalList     
+        return signalList    

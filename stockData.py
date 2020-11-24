@@ -22,21 +22,57 @@ class StockData:
         self.code_ = code
         self.name_ = name
         self.chartData_ = df
-        
+        self.resetInfo()
+
+    def resetInfo(self):
         self.buyCount_ = 0
         self.buyPrice_ = 0
+        self.buyIdx_ = 0
         self.position_ = BuyState.STAY
-        self.predicPrice_ = 0        # 머신러닝으로 예측한 다음날 주식값
+        self.predicPrice_ = 0        # 과거기록 누적. 이후 얼마나 잘 맞추고 있는지도 보여줌
         self.strategyAction_ = BuyState.STAY
         self.teleLog_ = ""
         self.marketCapRanking_ = 0
+        self.backTestIter_ = -1
+
+    def calcValue(self, timeIdx = -1):
+        if self.buyCount_ == 0:
+            return 0
+
+        nowPrice = self.nowPrice(timeIdx)
+        return nowPrice * self.buyCount_
+
+    def nowOnwProfit(self, timeIdx = -1):
+        if self.buyCount_ == 0:
+            return 0
+
+        nowPrice = self.nowPrice(timeIdx)
+        return (nowPrice - self.buyPrice_)
+   
+    def nowProfit(self, timeIdx = -1):
+        return self.nowOnwProfit(timeIdx) * self.buyCount_
+   
+    def getCandle(self, candleTime):
+        for index, candle in self.chartData_.iterrows():
+            ct = candle["candleTime"]
+            if ct == candleTime:
+                return index, candle
+        return -1, None 
+
+    def getCandleAt(self, idx):
+        return self.chartData_.iloc[idx]
+
+    def nowPrice(self, timeIdx = -1):
+        candle = self.chartData_.iloc[timeIdx]
+        nowPrice = candle["close"]
+        return nowPrice
 
     def canPredic(self):
         size = len(self.chartData_)
         if size < 300:
             return False
         return True
-
+        
     def calcPredicRate(self):
         if self.canPredic() == False:
             return 0
@@ -66,13 +102,8 @@ class StockData:
             return None
         return self.chartData_.iloc[-3]
 
-    def calcProfit(self):
-        if self.buyCount_ == 0:
-            return 0
-     
-        profit = self.buyCount_ * self.buyPrice_
-        return profit    
 
+    
     # 각종 보조지표, 기술지표 계산
     def calcIndicator(self):        
         arrClose = np.asarray(self.chartData_["close"], dtype='f8')

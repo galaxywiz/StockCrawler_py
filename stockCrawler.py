@@ -103,7 +103,7 @@ class KoreaStockCrawler(StockCrawler):
         except:
             return self.getKoreaStockDataFromNaver(rowTicker, loadDays)
    
-    def getStocksList(self, limit):
+    def getStocksList(self, limit, debug = False):
         # 한국 주식 회사 등록 정보 가지고 오기
         stockDf = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13', header=0)[0]
         stockDf.종목코드 = stockDf.종목코드.map('{:06d}'.format)
@@ -116,10 +116,13 @@ class KoreaStockCrawler(StockCrawler):
         dropIdx = []
         for idx, row in stockDf.iterrows():
             try:
-                ticker = self.__getTicker(row['code'])
-                p = web.get_quote_yahoo(ticker)['marketCap']
-                marketCap = int(p.values[0])
-                marketCapList.append(marketCap)
+                if debug == False:
+                    ticker = self.__getTicker(row['code'])
+                    p = web.get_quote_yahoo(ticker)['marketCap']
+                    marketCap = int(p.values[0])
+                    marketCapList.append(marketCap)
+                else:
+                    marketCapList.append(idx)
             except:
                 dropIdx.append(idx)
                 print("[%s][%s] 시총 갖고오기 에러" % (row['name'], row['code']))
@@ -159,7 +162,7 @@ class USAStockCrawler(StockCrawler):
             print("[%s] Ticker load fail" % ticker)
             return None
     
-    def getStocksList(self, limit):
+    def getStocksList(self, limit, debug = False):
         sp500 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")[0]
         sp500 = sp500[['Security', 'Symbol']] 
         sp500 = sp500.rename(columns={'Security': 'name', 'Symbol': 'code'})
@@ -175,10 +178,13 @@ class USAStockCrawler(StockCrawler):
         dropIdx = []
         for idx, row in stockDf.iterrows():
             try:
-                tickers = row['code']
-                p = web.get_quote_yahoo(tickers)['marketCap']
-                marketCap = int(p.values[0])
-                marketCapList.append(marketCap)
+                if debug == False:
+                    tickers = row['code']
+                    p = web.get_quote_yahoo(tickers)['marketCap']
+                    marketCap = int(p.values[0])
+                    marketCapList.append(marketCap)
+                else:
+                    marketCapList.append(idx)
             except:
                 dropIdx.append(idx)
                 marketCapList.append(0)

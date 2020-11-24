@@ -31,9 +31,11 @@ import os
 import time
 import signal
 import sys
+import datetime
 
 import botConfig
 from bot import Bot
+from backTestMarket import BackTestMarket
 
 def test(bot):
     bot.getStocksList()
@@ -47,24 +49,34 @@ def signalHandler(sig, frame):
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signalHandler)
     
-    usaBot = Bot(botConfig.USABotConfig())
-    koreaBot = Bot(botConfig.KoreaBotConfig())
 
-    test(usaBot)
-    test(koreaBot)
 
-    botList = []
-    botList.append(usaBot)
-    botList.append(koreaBot)
+    config = botConfig.KoreaBotConfig()
+    tester = BackTestMarket(config)
 
-    while(True):
-        now = time.localtime()
-        if now.tm_wday < 6:  ## 일요일은 안함
-            for bot in botList:
-                bot.do()
+    startTime = datetime.datetime(2015, 12, 1)
+    now = datetime.datetime.now()
+    endTime = datetime.datetime(now.year, now.month, now.day)
+    tester.processMarket(startTime, endTime)
 
-        current = "%04d-%02d-%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-        print("지금시간 : [%s]" % current)
-        time.sleep(60)
+    # usaBot = Bot(botConfig.USABotConfig())
+    # koreaBot = Bot(botConfig.KoreaBotConfig())
+
+    # test(usaBot)
+    # test(koreaBot)
+    
+    # botList = []
+    # botList.append(usaBot)
+    # botList.append(koreaBot)
+
+    # while(True):
+    #     now = time.localtime()
+    #     if now.tm_wday < 6:  ## 일요일은 안함
+    #         for bot in botList:
+    #             bot.do()
+
+    #     current = "%04d-%02d-%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+    #     print("지금시간 : [%s]" % current)
+    #     time.sleep(60)
 
     
