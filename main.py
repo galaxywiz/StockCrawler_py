@@ -48,35 +48,36 @@ def signalHandler(sig, frame):
 # 메인 함수 시작
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signalHandler)
-    
 
+    ## 전략 백테스팅 경우 밑의 변수를 True로
+    backTestMode = False
+    if backTestMode:    
+        config = botConfig.KoreaBotConfig()
+        tester = BackTestMarket(config)
 
-    config = botConfig.KoreaBotConfig()
-    tester = BackTestMarket(config)
+        startTime = datetime.datetime(2015, 12, 1)
+        now = datetime.datetime.now()
+        endTime = datetime.datetime(now.year, now.month, now.day)
+        tester.processMarket(startTime, endTime)
+    else:
+        usaBot = Bot(botConfig.USABotConfig())
+        koreaBot = Bot(botConfig.KoreaBotConfig())
 
-    startTime = datetime.datetime(2015, 12, 1)
-    now = datetime.datetime.now()
-    endTime = datetime.datetime(now.year, now.month, now.day)
-    tester.processMarket(startTime, endTime)
+        test(usaBot)
+        test(koreaBot)
 
-    # usaBot = Bot(botConfig.USABotConfig())
-    # koreaBot = Bot(botConfig.KoreaBotConfig())
+        botList = []
+        botList.append(usaBot)
+        botList.append(koreaBot)
 
-    # test(usaBot)
-    # test(koreaBot)
-    
-    # botList = []
-    # botList.append(usaBot)
-    # botList.append(koreaBot)
+        while(True):
+            now = time.localtime()
+            if now.tm_wday < 6:  ## 일요일은 안함
+                for bot in botList:
+                    bot.do()
 
-    # while(True):
-    #     now = time.localtime()
-    #     if now.tm_wday < 6:  ## 일요일은 안함
-    #         for bot in botList:
-    #             bot.do()
-
-    #     current = "%04d-%02d-%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-    #     print("지금시간 : [%s]" % current)
-    #     time.sleep(60)
+            current = "%04d-%02d-%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+            print("지금시간 : [%s]" % current)
+            time.sleep(60)
 
     
